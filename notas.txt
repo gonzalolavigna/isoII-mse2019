@@ -1,0 +1,73 @@
+setenv bootargs console=ttyPS0,115200n8 consoleblank=0 root=/dev/mmcblk0p2 rw rootwait earlyprintk
+
+setenv bootargs root=/dev/mmcblk0p2 rw rootwait earlyprintk
+fatload mmc 0 0x3000000 uImage
+fatload mmc 0 0x2A00000 devicetree.dtb
+
+bootm 0x3000000 - 0x2A00000
+
+
+picocom -b 115200 /dev/ttyUSB1
+
+#Para inicializar la red hacer dos veces esto como root.
+ip link set dev eth0 down
+dhclient eth0
+
+
+Este es el path en el que se hizo todo.
+/home/glavigna/mese_2019_linux_xilinx/u-boot-xlnx/tools:/home/glavigna/mese_2019_linux_xilinx/u-boot-xlnx/tools:/home/glavigna/mese_2019_linux_xilinx/dtc:/tools/Xilinx/SDK/2019.1/bin:/tools/Xilinx/SDK/2019.1/gnu/microblaze/lin/bin:/tools/Xilinx/SDK/2019.1/gnu/arm/lin/bin:/tools/Xilinx/SDK/2019.1/gnu/microblaze/linux_toolchain/lin64_le/bin:/tools/Xilinx/SDK/2019.1/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin:/tools/Xilinx/SDK/2019.1/gnu/aarch32/lin/gcc-arm-none-eabi/bin:/tools/Xilinx/SDK/2019.1/gnu/aarch64/lin/aarch64-linux/bin:/tools/Xilinx/SDK/2019.1/gnu/aarch64/lin/aarch64-none/bin:/tools/Xilinx/SDK/2019.1/gnu/armr5/lin/gcc-arm-none-eabi/bin:/tools/Xilinx/SDK/2019.1/tps/lnx64/cmake-3.3.2/bin:/tools/Xilinx/DocNav:/tools/Xilinx/Vivado/2019.1/bin:/home/glavigna/anaconda3/bin:/home/glavigna/anaconda3/condabin:/home/glavigna/bin:/home/glavigna/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+
+
+Se prueba con el .dtb que se genero antes con solo los GPIOs
+
+Estos son los usuarios y contraseña
+root root
+xilinx xlnx
+
+dme
+Para generar el dtc ir a la carpeta scripts del kernel de xilinx
+
+./dtc -I dts -O dtb -o ./../../../devicetree.dtb ./../../../test_project/test_project.sdk/device_tree_bsp_2/devicetree.dts
+
+
+
+Para compilar el kernel 
+
+make ARCH=arm xilinx_zynq_defconfig
+make ARCH=arm menuconfig
+make ARCH=arm UIMAGE_LOADADDR=0x8000 uImage -j12
+
+#Para construir los modulos de kernel
+make ARCH=arm modules
+sudo make ARCH=arm INSTALL_MOD_PATH=./../ROOT_FS/ modules_install
+
+find /proc/device-tree/ -type f -exec head {} + | less
+
+cp ./test_project/test_project.sdk/fsbl_1/bootimage/BOOT.bin ./
+
+Deswpues de conectar la interrupcion salio todo en orden. Reconocio el device tree. Claramente debe haber algo con el polling para el puerto serie.
+
+Para salir de una consola SSH hay qeu pulsa ENTER ~ .  --> Si esa secuencia de caracteres
+
+Le pongo con el buildroot dropbear un ftp python 2.7 y tambien el ascii invader.
+Tambien viene con un dhcp
+
+
+si se mama el ssh ir por esta:
+ssh-keygen -f "/home/glavigna/.ssh/known_hosts" -R 192.168.0.16
+
+adduser para agregar un usuario
+
+Tener en mente el CONFIG_OF_EMBED en el mensaje del u-boot
+
+No valid device tree binary found - please append one to U-Boot binary, use u-boot-dtb.bin or define CONFIG_OF_EMBED. For sandbox, use -d <file.dtb> zybo
+
+
+Para conectarme cualquiera sea la ip ssh root@192.168.0.18
+
+
+
+
+
+
